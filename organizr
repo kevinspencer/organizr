@@ -18,28 +18,39 @@ use File::stat;
 use Time::localtime;
 use strict;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my $user    = getpwuid($<);
 my $BASEDIR = "/Users/$user/Pictures";
 
+my %seendir;
 processDirectory($BASEDIR);
 
 sub processDirectory {
     my $dir = shift;
 
-    print "Processing $dir\n";
     opendir(DIR, $dir) || die "Could not open $dir - $!\n";
     for my $filefound (readdir(DIR)) {
         next if ($filefound =~ /^\./);
-        my $fullpath = File::Spec->catfile($dir, $filefound);
-        if (-d $fullpath) {
-            processDirectory($fullpath);
+        my $fileFoundFullPath = File::Spec->catfile($dir, $filefound);
+        if (-d $fileFoundFullPath) {
+            processDirectory($fileFoundFullPath);
         } else {
-            my $stat = stat($fullpath);
+            my $stat = stat($fileFoundFullPath);
             my $time = localtime($stat->mtime());
-            print "$fullpath - ";
-            printf("%04d-%02d\n", $time->year() + 1900, $time->mon() + 1);
+            my $YYYY = $time->year() + 1900;
+            my $MM   = sprintf("%02d", $time->mon() + 1);
+            my $finaldir = File::Spec->catdir($BASEDIR, $YYYY, "$YYYY-$MM");
+            if (! $seendir{$finaldir}++) {
+                if (! -d $finaldir) {
+                    eval { mkpath($finaldir) };
+                    if ($@) {
+                        die $@;
+                    }
+                }
+            }
+            move($fileFoundFullPath, $finaldir) ||
+                die "Couldn't move $fileFoundFullPath to $finaldir - $!\n";
         }
     }
 }
