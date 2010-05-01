@@ -19,10 +19,11 @@ use File::stat;
 use Time::localtime;
 use strict;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
-my $user    = getpwuid($<);
-my $BASEDIR = "/Users/$user/Pictures";
+my $user     = getpwuid($<);
+my $BASEDIR  = "/Users/$user/foo";
+#my $STOREDIR = File::Spec->catdir($BASEDIR, 'storage');
 
 my %seendir;
 processDirectory($BASEDIR);
@@ -30,6 +31,7 @@ processDirectory($BASEDIR);
 sub processDirectory {
     my $dir = shift;
 
+    #return if ($dir eq $STOREDIR);
     opendir(DIR, $dir) || die "Could not open $dir - $!\n";
     for my $filefound (readdir(DIR)) {
         next if ($filefound =~ /^\./);
@@ -62,11 +64,15 @@ sub processFile {
     my $finalfile = 
         File::Spec->catfile($finaldir, basename($fileFoundFullPath));
     if (-e $finalfile) {
-        # file already exists so we'll just add a sequence #
+        # file already exists so we'll just add a sequence # and rename it
         my ($name, undef, $suffix) = 
             fileparse($fileFoundFullPath, qr/\.[^.]*/);
-
-        $name = $name .= '1';
+        $name = $name . '.1' . $suffix;
+        my $newFileFullPath = 
+            File::Spec->catfile(dirname($fileFoundFullPath), $name);
+        rename($fileFoundFullPath, $newFileFullPath) ||
+            die "Could not rename $fileFoundFullPath to $newFileFullPath $!\n";
+        $fileFoundFullPath = $newFileFullPath;
     }
     move($fileFoundFullPath, $finaldir) ||
         die "Couldn't move $fileFoundFullPath to $finaldir - $!\n";
