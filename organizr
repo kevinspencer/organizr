@@ -19,11 +19,11 @@ use File::stat;
 use Time::localtime;
 use strict;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 my $user     = getpwuid($<);
 my $BASEDIR  = "/Users/$user/foo";
-#my $STOREDIR = File::Spec->catdir($BASEDIR, 'storage');
+my $STOREDIR = File::Spec->catdir($BASEDIR, 'storage');
 
 my %seendir;
 processDirectory($BASEDIR);
@@ -31,7 +31,7 @@ processDirectory($BASEDIR);
 sub processDirectory {
     my $dir = shift;
 
-    #return if ($dir eq $STOREDIR);
+    return if ($dir =~ /$STOREDIR/);
     opendir(DIR, $dir) || die "Could not open $dir - $!\n";
     for my $filefound (readdir(DIR)) {
         next if ($filefound =~ /^\./);
@@ -51,7 +51,7 @@ sub processFile {
     my $time = localtime($stat->mtime());
     my $YYYY = $time->year() + 1900;
     my $MM   = sprintf("%02d", $time->mon() + 1);
-    my $finaldir = File::Spec->catdir($BASEDIR, $YYYY, "$YYYY-$MM");
+    my $finaldir = File::Spec->catdir($STOREDIR, $YYYY, "$YYYY-$MM");
     if (! $seendir{$finaldir}++) {
         if (! -d $finaldir) {
             eval { mkpath($finaldir) };
