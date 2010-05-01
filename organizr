@@ -22,7 +22,7 @@ use strict;
 our $VERSION = '0.05';
 
 my $user     = getpwuid($<);
-my $BASEDIR  = "/Users/$user/foo";
+my $BASEDIR  = "/Users/$user/Pictures";
 my $STOREDIR = File::Spec->catdir($BASEDIR, 'storage');
 
 my %seendir;
