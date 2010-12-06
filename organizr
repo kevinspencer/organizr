@@ -19,7 +19,7 @@ use File::stat;
 use Time::localtime;
 use strict;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 my $user     = getpwuid($<);
 my $BASEDIR  = "/Users/$user/Pictures";
@@ -33,8 +33,7 @@ sub processDirectory {
 
     return if ($dir =~ /$STOREDIR/);
     opendir(DIR, $dir) || die "Could not open $dir - $!\n";
-    for my $filefound (readdir(DIR)) {
-        next if ($filefound =~ /^\./);
+    for my $filefound (grep /\.JPG$/i, readdir(DIR)) {
         my $fileFoundFullPath = File::Spec->catfile($dir, $filefound);
         if (-d $fileFoundFullPath) {
             processDirectory($fileFoundFullPath);
