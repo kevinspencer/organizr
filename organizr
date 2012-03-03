@@ -20,14 +20,15 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
-my $user     = getpwuid($<);
-my $BASEDIR  = "/Users/$user/Pictures/to-import";
-my $STOREDIR = File::Spec->catdir($BASEDIR, 'storage');
+my $user      = getpwuid($<);
+my $BASEDIR   = "/Users/$user/Pictures";
+my $IMPORTDIR = File::Spec->catdir($BASEDIR, 'to-import');
+my $STOREDIR  = File::Spec->catdir($BASEDIR, 'storage');
 
 my %seendir;
-processDirectory($BASEDIR);
+processDirectory($IMPORTDIR);
 
 sub processDirectory {
     my $dir = shift;
