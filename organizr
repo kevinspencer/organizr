@@ -20,10 +20,10 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 my $user     = getpwuid($<);
-my $BASEDIR  = "/Users/$user/Pictures";
+my $BASEDIR  = "/Users/$user/Pictures/to-import";
 my $STOREDIR = File::Spec->catdir($BASEDIR, 'storage');
 
 my %seendir;
