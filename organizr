@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright 2010-2012 Kevin Spencer <kevin@kevinspencer.org>
+# Copyright 2010-2016 Kevin Spencer <kevin@kevinspencer.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -13,6 +13,7 @@
 
 use File::Basename;
 use File::Copy;
+use File::HomeDir;
 use File::Path;
 use File::Spec;
 use File::stat;
@@ -20,17 +21,17 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 my $user      = getpwuid($<);
-my $BASEDIR   = "/Users/$user/Pictures";
+my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
 my $IMPORTDIR = File::Spec->catdir($BASEDIR, 'to-import');
 my $STOREDIR  = File::Spec->catdir($BASEDIR, 'storage');
 
 my %seendir;
-processDirectory($IMPORTDIR);
+processImportDirectory($IMPORTDIR);
 
-sub processDirectory {
+sub processImportDirectory {
     my $dir = shift;
 
     return if ($dir =~ /$STOREDIR/);
@@ -38,14 +39,14 @@ sub processDirectory {
     for my $filefound (grep /\.JPG$|\.CR2$/i, readdir(DIR)) {
         my $fileFoundFullPath = File::Spec->catfile($dir, $filefound);
         if (-d $fileFoundFullPath) {
-            processDirectory($fileFoundFullPath);
+            processImportDirectory($fileFoundFullPath);
         } else {
-            processFile($fileFoundFullPath);
+            processImportFile($fileFoundFullPath);
         }
     }
 }
 
-sub processFile {
+sub processImportFile {
     my $fileFoundFullPath = shift;
 
     my $stat = stat($fileFoundFullPath);
@@ -62,20 +63,17 @@ sub processFile {
         }
     }
     # make sure we don't clobber an existing file...
-    my $finalfile = 
-        File::Spec->catfile($finaldir, basename($fileFoundFullPath));
+    my $finalfile = File::Spec->catfile($finaldir, basename($fileFoundFullPath));
     if (-e $finalfile) {
         # file already exists so we'll just add a sequence # and rename it
         my $seq = 0;
         while(1) {
             $seq++;
-            my ($name, undef, $suffix) = 
-                fileparse($fileFoundFullPath, qr/\.[^.]*/);
+            my ($name, undef, $suffix) = fileparse($fileFoundFullPath, qr/\.[^.]*/);
             $name = $name . '.' . $seq . $suffix;
             $finalfile = File::Spec->catfile($finaldir, $name);
             next if (-e $finalfile);
-            my $newFileFullPath = 
-                File::Spec->catfile(dirname($fileFoundFullPath), $name);
+            my $newFileFullPath = File::Spec->catfile(dirname($fileFoundFullPath), $name);
             rename($fileFoundFullPath, $newFileFullPath) ||
                 die "Could not rename $fileFoundFullPath to $newFileFullPath $!\n";
             $fileFoundFullPath = $newFileFullPath;
