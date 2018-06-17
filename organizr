@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright 2010-2016 Kevin Spencer <kevin@kevinspencer.org>
+# Copyright 2010-2018 Kevin Spencer <kevin@kevinspencer.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -21,7 +21,7 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 my $user      = getpwuid($<);
 my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
@@ -36,7 +36,7 @@ sub processImportDirectory {
 
     return if ($dir =~ /$STOREDIR/);
     opendir(DIR, $dir) || die "Could not open $dir - $!\n";
-    for my $filefound (grep /\.JPG$|\.CR2$/i, readdir(DIR)) {
+    for my $filefound (grep /\.JPG$|\.CR2$|\.JPEG$/i, readdir(DIR)) {
         my $fileFoundFullPath = File::Spec->catfile($dir, $filefound);
         if (-d $fileFoundFullPath) {
             processImportDirectory($fileFoundFullPath);
