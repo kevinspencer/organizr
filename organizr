@@ -22,7 +22,7 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 my $user      = getpwuid($<);
 my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
@@ -84,11 +84,11 @@ sub process_import_directory {
 }
 
 sub get_image_date {
-    my $file = shift;
+    my $filefound_fullpath = shift;
 
     # we'll attempt to extract the date created from Exif information
     my $exiftool = Image::ExifTool->new();
-    $exiftool->ExtractInfo($file);
+    $exiftool->ExtractInfo($filefound_fullpath);
 
     my $date_created = $exiftool->GetValue('DateCreated');
     # 2018:12:05 03:07:41.082
@@ -96,6 +96,14 @@ sub get_image_date {
     if ($date_created =~ /(\d{4}):(\d{2}):(\d{2})/) {
         $imgdate{YYYY} = $1;
         $imgdate{MM}   = $2;
+    }
+
+    # if for some reason we don't have Exif data fall back to file date from disk
+    if (! %imgdate) {
+        my $stat = stat($filefound_fullpath);
+        my $time = localtime($stat->mtime());
+        $imgdate{YYYY} = $time->year() + 1900;
+        $imgdate{MM}   = sprintf("%02d", $time->mon() + 1);
     }
 
     return \%imgdate;
