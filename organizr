@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright 2010-2018 Kevin Spencer <kevin@kevinspencer.org>
+# Copyright 2010-2019 Kevin Spencer <kevin@kevinspencer.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -17,11 +17,12 @@ use File::HomeDir;
 use File::Path;
 use File::Spec;
 use File::stat;
+use Image::ExifTool;
 use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 my $user      = getpwuid($<);
 my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
@@ -49,10 +50,18 @@ sub processImportDirectory {
 sub processImportFile {
     my $fileFoundFullPath = shift;
 
-    my $stat = stat($fileFoundFullPath);
-    my $time = localtime($stat->mtime());
-    my $YYYY = $time->year() + 1900;
-    my $MM   = sprintf("%02d", $time->mon() + 1);
+    # we'll attempt to extract the date created from Exif information
+    my $exiftool = Image::ExifTool->new();
+    $exiftool->ExtractInfo($fileFoundFullPath);
+
+    my $date_created = $exiftool->GetValue('DateCreated');
+    # 2018:12:05 03:07:41.082
+    my ($YYYY, $MM);
+    if ($date_created =~ /(\d{4}):(\d{2}):(\d{2})/) {
+        $YYYY = $1;
+        $MM   = $2;
+    }
+    
     my $finaldir = File::Spec->catdir($STOREDIR, $YYYY, "$YYYY-$MM");
     if (! $seendir{$finaldir}++) {
         if (! -d $finaldir) {
