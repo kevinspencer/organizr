@@ -22,7 +22,7 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 my $user      = getpwuid($<);
 my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
@@ -50,19 +50,9 @@ sub processImportDirectory {
 sub processImportFile {
     my $fileFoundFullPath = shift;
 
-    # we'll attempt to extract the date created from Exif information
-    my $exiftool = Image::ExifTool->new();
-    $exiftool->ExtractInfo($fileFoundFullPath);
+    my $img_date = get_image_date($fileFoundFullPath);
 
-    my $date_created = $exiftool->GetValue('DateCreated');
-    # 2018:12:05 03:07:41.082
-    my ($YYYY, $MM);
-    if ($date_created =~ /(\d{4}):(\d{2}):(\d{2})/) {
-        $YYYY = $1;
-        $MM   = $2;
-    }
-    
-    my $finaldir = File::Spec->catdir($STOREDIR, $YYYY, "$YYYY-$MM");
+    my $finaldir = File::Spec->catdir($STOREDIR, $img_date->{YYYY}, "$img_date->{YYYY}-$img_date->{MM}");
     if (! $seendir{$finaldir}++) {
         if (! -d $finaldir) {
             eval { mkpath($finaldir) };
@@ -91,4 +81,22 @@ sub processImportFile {
     }
     move($fileFoundFullPath, $finaldir) ||
         die "Couldn't move $fileFoundFullPath to $finaldir - $!\n";
+}
+
+sub get_image_date {
+    my $file = shift;
+
+    # we'll attempt to extract the date created from Exif information
+    my $exiftool = Image::ExifTool->new();
+    $exiftool->ExtractInfo($file);
+
+    my $date_created = $exiftool->GetValue('DateCreated');
+    # 2018:12:05 03:07:41.082
+    my %imgdate = ();
+    if ($date_created =~ /(\d{4}):(\d{2}):(\d{2})/) {
+        $imgdate{YYYY} = $1;
+        $imgdate{MM}   = $2;
+    }
+
+    return \%imgdate;
 }
