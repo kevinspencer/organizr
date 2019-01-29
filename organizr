@@ -22,7 +22,7 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 my $user      = getpwuid($<);
 my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
@@ -37,7 +37,7 @@ sub process_import_directory {
 
     return if ($dir =~ /$STOREDIR/);
     opendir(DIR, $dir) || die "Could not open $dir - $!\n";
-    for my $filefound (grep /\.JPG$|\.CR2$|\.JPEG$/i, readdir(DIR)) {
+    for my $filefound (grep /\.JPG$|\.CR2$|\.NEF$|\.JPEG$/i, readdir(DIR)) {
         my $filefound_fullpath = File::Spec->catfile($dir, $filefound);
         if (-d $filefound_fullpath) {
             process_import_directory($filefound_fullpath);
