@@ -22,7 +22,7 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 my $user      = getpwuid($<);
 my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
@@ -91,6 +91,8 @@ sub get_image_date {
     $exiftool->ExtractInfo($filefound_fullpath);
 
     my $date_created = $exiftool->GetValue('DateCreated');
+    $date_created    = $exiftool->GetValue('CreateDate') if (! $date_created);
+
     # 2018:12:05 03:07:41.082
     my %imgdate = ();
     if (($date_created) && ($date_created =~ /(\d{4}):(\d{2}):(\d{2})/)) {
