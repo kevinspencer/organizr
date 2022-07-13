@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright 2010-2019 Kevin Spencer <kevin@kevinspencer.org>
+# Copyright 2010-2022 Kevin Spencer <kevin@kevinspencer.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -22,7 +22,7 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 my $user      = getpwuid($<);
 my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
