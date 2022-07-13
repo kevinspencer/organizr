@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright 2010-2019 Kevin Spencer <kevin@kevinspencer.org>
+# Copyright 2010-2022 Kevin Spencer <kevin@kevinspencer.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -17,20 +17,33 @@ use File::HomeDir;
 use File::Path;
 use File::Spec;
 use File::stat;
+use Getopt::Long;
 use Image::ExifTool;
 use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
+
+my $cli_store_dir;
+GetOptions ("storedir=s" => \$cli_store_dir);
 
 my $user      = getpwuid($<);
 my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
 my $IMPORTDIR = File::Spec->catdir($BASEDIR, 'to-import');
-my $STOREDIR  = File::Spec->catdir($BASEDIR, 'storage');
+my $STOREDIR  = File::Spec->catdir($cli_store_dir ? $cli_store_dir : $BASEDIR, 'storage');
 
 my %seendir;
+sanity_check_directories($BASEDIR, $IMPORTDIR, $STOREDIR);
 process_import_directory($IMPORTDIR);
+
+sub sanity_check_directories {
+    my @directories = @_;
+
+    for my $directory (@directories) {
+        die "$directory doesn't exist\n" if (! -d $directory);
+    }
+}
 
 sub process_import_directory {
     my $dir = shift;
