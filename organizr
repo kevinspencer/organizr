@@ -23,7 +23,7 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 my $cli_store_dir;
 GetOptions ("storedir=s" => \$cli_store_dir);
@@ -32,6 +32,8 @@ my $user      = getpwuid($<);
 my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
 my $IMPORTDIR = File::Spec->catdir($BASEDIR, 'to-import');
 my $STOREDIR  = File::Spec->catdir($cli_store_dir ? $cli_store_dir : $BASEDIR, 'storage');
+
+my @extensions = qw(JPG CR2 NEF JPEG HEIC HEIF PNG RAW);
 
 my %seendir;
 sanity_check_directories($BASEDIR, $IMPORTDIR, $STOREDIR);
@@ -49,8 +51,11 @@ sub process_import_directory {
     my $dir = shift;
 
     return if ($dir =~ /$STOREDIR/);
+
+    my $ext_regex = join '|', map { quotemeta } @extensions;
+
     opendir(DIR, $dir) || die "Could not open $dir - $!\n";
-    for my $filefound (grep /\.JPG$|\.CR2$|\.NEF$|\.JPEG$|\.HEIC$|\.PNG$/i, readdir(DIR)) {
+    for my $filefound (grep /\.(?:$ext_regex)$/i, readdir(DIR)) {
         my $filefound_fullpath = File::Spec->catfile($dir, $filefound);
         if (-d $filefound_fullpath) {
             process_import_directory($filefound_fullpath);
