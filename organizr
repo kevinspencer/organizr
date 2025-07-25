@@ -23,7 +23,7 @@ use Time::localtime;
 use strict;
 use warnings;
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 my $cli_store_dir;
 GetOptions ("storedir=s" => \$cli_store_dir);
@@ -54,8 +54,8 @@ sub process_import_directory {
 
     my $ext_regex = join '|', map { quotemeta } @extensions;
 
-    opendir(DIR, $dir) || die "Could not open $dir - $!\n";
-    for my $filefound (grep /\.(?:$ext_regex)$/i, readdir(DIR)) {
+    opendir(my $dh, $dir) or die "Could not open $dir - $!\n";
+    for my $filefound (grep /\.(?:$ext_regex)$/i, readdir($dh)) {
         my $filefound_fullpath = File::Spec->catfile($dir, $filefound);
         if (-d $filefound_fullpath) {
             process_import_directory($filefound_fullpath);
@@ -63,6 +63,7 @@ sub process_import_directory {
             process_import_file($filefound_fullpath);
         }
     }
+    closedir($dh);
 }
 
 sub process_import_file {
