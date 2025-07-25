@@ -20,6 +20,7 @@ use File::stat;
 use Getopt::Long;
 use Image::ExifTool;
 use Time::localtime;
+use Try::Tiny;
 use strict;
 use warnings;
 
@@ -74,10 +75,11 @@ sub process_import_file {
     my $finaldir = File::Spec->catdir($STOREDIR, $img_date->{YYYY}, "$img_date->{YYYY}-$img_date->{MM}");
     if (! $seendir{$finaldir}++) {
         if (! -d $finaldir) {
-            eval { mkpath($finaldir) };
-            if ($@) {
-                die $@;
-            }
+            try {
+                mkpath($finaldir);
+            } catch {
+                die "Failed to create $finaldir: $_";
+            };
         }
     }
     # make sure we don't clobber an existing file...
