@@ -111,8 +111,10 @@ sub get_image_date {
     my $exiftool = Image::ExifTool->new();
     $exiftool->ExtractInfo($filefound_fullpath);
 
-    my $date_created = $exiftool->GetValue('DateCreated');
-    $date_created    = $exiftool->GetValue('CreateDate') if (! $date_created);
+    my $date_created = $exiftool->GetValue('DateTimeOriginal')
+        // $exiftool->GetValue('CreateDate')
+        // $exiftool->GetValue('DateCreated');
+
 
     # 2018:12:05 03:07:41.082
     my %imgdate = ();
