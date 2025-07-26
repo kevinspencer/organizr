@@ -24,7 +24,7 @@ use Try::Tiny;
 use strict;
 use warnings;
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 my $cli_store_dir;
 GetOptions ("storedir=s" => \$cli_store_dir);
@@ -38,7 +38,7 @@ my @extensions = qw(JPG CR2 NEF JPEG HEIC HEIF PNG RAW);
 
 my %seendir;
 sanity_check_directories($BASEDIR, $IMPORTDIR, $STOREDIR);
-process_import_directory($IMPORTDIR);
+process_import_directory($IMPORTDIR, $STOREDIR);
 
 sub sanity_check_directories {
     my @directories = @_;
@@ -49,9 +49,9 @@ sub sanity_check_directories {
 }
 
 sub process_import_directory {
-    my $dir = shift;
+    my ($dir, $storedir) = @_;
 
-    return if ($dir =~ /$STOREDIR/);
+    return if ($dir =~ /\Q$storedir\E/);
 
     my $ext_regex = join '|', map { quotemeta } @extensions;
 
