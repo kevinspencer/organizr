@@ -24,7 +24,7 @@ use Try::Tiny;
 use strict;
 use warnings;
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 my ($cli_store_dir, $cli_import_dir);
 
@@ -39,6 +39,8 @@ my $IMPORTDIR = File::Spec->catdir($cli_import_dir ? $cli_import_dir : $BASEDIR,
 my $STOREDIR  = File::Spec->catdir($cli_store_dir ? $cli_store_dir : $BASEDIR, 'storage');
 
 my @extensions = qw(JPG CR2 NEF JPEG HEIC HEIF PNG RAW);
+
+my $ext_regex = qr/\.(?:@{[ join '|', map { quotemeta } @extensions ]})$/i;
 
 my %seendir;
 sanity_check_directories($BASEDIR, $IMPORTDIR, $STOREDIR);
@@ -57,10 +59,8 @@ sub process_import_directory {
 
     return if ($dir =~ /\Q$storedir\E/);
 
-    my $ext_regex = join '|', map { quotemeta } @extensions;
-
     opendir(my $dh, $dir) or die "Could not open $dir - $!\n";
-    for my $filefound (grep /\.(?:$ext_regex)$/i, readdir($dh)) {
+    for my $filefound (grep { /$ext_regex/ } readdir($dh)) {
         my $filefound_fullpath = File::Spec->catfile($dir, $filefound);
         if (-d $filefound_fullpath) {
             process_import_directory($filefound_fullpath, $storedir);
