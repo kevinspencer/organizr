@@ -15,16 +15,16 @@ use File::Basename;
 use File::Copy;
 use File::HomeDir;
 use File::Path;
-use File::Spec;
 use File::stat;
 use Getopt::Long;
 use Image::ExifTool;
+use Path::Tiny;
 use Time::localtime;
 use Try::Tiny;
 use strict;
 use warnings;
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 my ($cli_store_dir, $cli_import_dir);
 
@@ -33,10 +33,10 @@ GetOptions (
     "importdir=s" => \$cli_import_dir
 );
 
-my $user      = getpwuid($<);
-my $BASEDIR   = File::Spec->catdir(File::HomeDir->my_home(), 'Pictures');
-my $IMPORTDIR = File::Spec->catdir($cli_import_dir ? $cli_import_dir : $BASEDIR, 'to-import');
-my $STOREDIR  = File::Spec->catdir($cli_store_dir ? $cli_store_dir : $BASEDIR, 'storage');
+
+my $BASEDIR   = path(File::HomeDir->my_home, 'Pictures');
+my $IMPORTDIR = path($cli_import_dir || $BASEDIR, 'to-import');
+my $STOREDIR  = path($cli_store_dir  || $BASEDIR, 'storage');
 
 my @extensions = qw(JPG CR2 NEF JPEG HEIC HEIF PNG RAW);
 
