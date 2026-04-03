@@ -23,7 +23,7 @@ use Try::Tiny;
 use strict;
 use warnings;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 my ($cli_store_dir, $cli_import_dir);
 
@@ -40,13 +40,16 @@ if (! $cli_import_dir) {
     die "Missing --importdir\n";
 }
 
+my $IMPORTDIR = path($cli_import_dir, 'to-import');
+my $STOREDIR  = path($cli_store_dir, 'storage');
+
 my @extensions = qw(JPG CR2 NEF JPEG HEIC HEIF PNG RAW);
 
 my $ext_regex = qr/\.(?:@{[ join '|', map { quotemeta } @extensions ]})$/i;
 
 my %seendir;
-sanity_check_directories($cli_import_dir, $cli_store_dir);
-process_import_directory($cli_import_dir, $cli_store_dir);
+sanity_check_directories($IMPORTDIR, $STOREDIR);
+process_import_directory($IMPORTDIR, $STOREDIR);
 
 sub sanity_check_directories {
     my @directories = @_;
