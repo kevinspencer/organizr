@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright 2010-2025 Kevin Spencer <kevin@kevinspencer.org>
+# Copyright 2010-2026 Kevin Spencer <kevin@kevinspencer.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -24,7 +24,7 @@ use Try::Tiny;
 use strict;
 use warnings;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 my ($cli_store_dir, $cli_import_dir);
 
@@ -33,6 +33,13 @@ GetOptions (
     "importdir=s" => \$cli_import_dir
 );
 
+if (! $cli_store_dir) {
+    die "Missing --storedir\n";
+}
+
+if (! $cli_import_dir) {
+    die "Missing --importdir\n";
+}
 
 my $BASEDIR   = path(File::HomeDir->my_home, 'Pictures');
 my $IMPORTDIR = path($cli_import_dir || $BASEDIR, 'to-import');
