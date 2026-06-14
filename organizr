@@ -23,7 +23,7 @@ use Try::Tiny;
 use strict;
 use warnings;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 my ($cli_store_dir, $cli_import_dir);
 
@@ -43,7 +43,7 @@ if (! $cli_import_dir) {
 my $IMPORTDIR = path($cli_import_dir, 'to-import');
 my $STOREDIR  = path($cli_store_dir, 'storage');
 
-my @extensions = qw(JPG CR2 NEF JPEG HEIC HEIF PNG RAW);
+my @extensions = qw(JPG CR2 NEF JPEG HEIC HEIF PNG RAW MOV);
 
 my $ext_regex = qr/\.(?:@{[ join '|', map { quotemeta } @extensions ]})$/i;
 
